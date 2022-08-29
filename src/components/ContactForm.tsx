@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useImmer, Updater } from "use-immer";
 import { userProps } from "../App";
-import { workoutProps } from "../pages/Home";
-interface WorkoutFormProps {
-  setWorkouts: Updater<workoutProps[] | null>;
+import { contactProps } from "../pages/Home";
+interface ContactFormProps {
+  setContacts: Updater<contactProps[] | null>;
   user: userProps | null;
 }
 
-function WorkoutForm(props: WorkoutFormProps) {
-  const { setWorkouts, user } = props;
+function ContactForm(props: ContactFormProps) {
+  const { setContacts, user } = props;
   const [form, setForm] = useImmer({
-    title: "",
-    load: "",
-    reps: "",
+    name: "",
+    second_name: "",
+    email: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [emptyFields, setEmptyFields] = useState<string[]>([]);
@@ -24,7 +24,7 @@ function WorkoutForm(props: WorkoutFormProps) {
       return;
     }
     const response = await fetch(
-      `${process.env.REACT_APP_ADDRESS}api/workouts`,
+      `${process.env.REACT_APP_ADDRESS}api/contacts`,
       {
         method: "POST",
         body: JSON.stringify(form),
@@ -42,57 +42,57 @@ function WorkoutForm(props: WorkoutFormProps) {
     if (response.ok) {
       setError(null);
       console.log(json);
-      setWorkouts((draft) => {
+      setContacts((draft) => {
         draft?.unshift(json);
       });
       setEmptyFields([]);
     }
     setForm({
-      title: "",
-      load: "",
-      reps: "",
+      name: "",
+      second_name: "",
+      email: "",
     });
   }
   return (
     <form className="wf" onSubmit={handleSubmit}>
-      <h3>Add a New Workout</h3>
-      <label>Excercise Title:</label>
+      <h3>Add a New contact</h3>
+      <label>Name:</label>
       <input
         type="text"
-        value={form.title}
+        value={form.name}
         onChange={(e) =>
           setForm((draft) => {
-            draft.title = e.target.value;
+            draft.name = e.target.value;
           })
         }
-        className={emptyFields?.includes("title") ? "error" : ""}
+        className={emptyFields?.includes("name") ? "error" : ""}
       />
-      <label>Load (in Kg):</label>
+      <label>Second Name:</label>
       <input
         type="number"
-        value={form.load}
+        value={form.second_name}
         onChange={(e) =>
           setForm((draft) => {
-            draft.load = e.target.value;
+            draft.second_name = e.target.value;
           })
         }
-        className={emptyFields?.includes("load") ? "error" : ""}
+        className={emptyFields?.includes("second_name") ? "error" : ""}
       />
-      <label>Reps:</label>
+      <label>Email:</label>
       <input
         type="number"
-        value={form.reps}
+        value={form.email}
         onChange={(e) =>
           setForm((draft) => {
-            draft.reps = e.target.value;
+            draft.email = e.target.value;
           })
         }
-        className={emptyFields?.includes("reps") ? "error" : ""}
+        className={emptyFields?.includes("email") ? "error" : ""}
       />
-      <button type="submit">Add Workout</button>
+      <button type="submit">Add Contact</button>
       {error && <div className="wf__error">{error}</div>}
     </form>
   );
 }
 
-export default WorkoutForm;
+export default ContactForm;

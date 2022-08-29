@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { AiOutlineDelete } from "react-icons/ai";
-import WorkoutForm from "../components/WorkoutForm";
+import WorkoutForm from "../components/ContactForm";
 import { userProps } from "../App";
 import { useImmer, Updater } from "use-immer";
 import { useNavigate } from "react-router-dom";
@@ -10,11 +10,11 @@ interface HomeProps {
   user: userProps | null;
 }
 
-export interface workoutProps {
+export interface contactProps {
   _id: string;
-  title: string;
-  reps: number;
-  load: number;
+  name: string;
+  second_name: string;
+  email: string;
   user_id: number;
   createdAt: string;
   updatedAt: string;
@@ -23,15 +23,15 @@ export interface workoutProps {
 
 function Home(props: HomeProps) {
   const { user } = props;
-  const [workouts, setWorkouts] = useImmer<workoutProps[] | null>(null);
+  const [contacts, setContacts] = useImmer<contactProps[] | null>(null);
 
   const navigate = useNavigate();
 
-  console.log(workouts);
+  console.log(contacts);
   useEffect(() => {
-    async function fetchWorkouts() {
+    async function fetchContacts() {
       const response = await fetch(
-        `${process.env.REACT_APP_ADDRESS}api/workouts`,
+        `${process.env.REACT_APP_ADDRESS}api/contacts`,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -41,13 +41,13 @@ function Home(props: HomeProps) {
       const json = await response.json();
 
       if (response.ok) {
-        setWorkouts(json);
+        setContacts(json);
       }
     }
     if (user) {
-      fetchWorkouts();
+      fetchContacts();
     }
-  }, [setWorkouts, user]);
+  }, [setContacts, user]);
 
   useEffect(() => {
     if (!user) {
@@ -58,16 +58,16 @@ function Home(props: HomeProps) {
   return (
     <div className="home">
       <div className="home__workouts">
-        {workouts?.map((v: workoutProps) => (
+        {contacts?.map((v: contactProps) => (
           <WorkoutDetails
             key={v._id}
             workout={v}
             user={user}
-            setWorkouts={setWorkouts}
+            setContacts={setContacts}
           />
         ))}
       </div>
-      <WorkoutForm user={user} setWorkouts={setWorkouts} />
+      <WorkoutForm user={user} setContacts={setContacts} />
     </div>
   );
 }
@@ -75,17 +75,17 @@ function Home(props: HomeProps) {
 export default Home;
 
 interface wdP {
-  workout: workoutProps;
+  workout: contactProps;
   user: userProps | null;
-  setWorkouts: Updater<workoutProps[] | null>;
+  setContacts: Updater<contactProps[] | null>;
 }
 
 function WorkoutDetails(props: wdP) {
-  const { workout, user, setWorkouts } = props;
+  const { workout, user, setContacts } = props;
 
   async function handleClick() {
     const res = await fetch(
-      `${process.env.REACT_APP_ADDRESS}api/workouts/${workout._id}`,
+      `${process.env.REACT_APP_ADDRESS}api/contacts/${workout._id}`,
       {
         method: "DELETE",
         headers: {
@@ -95,7 +95,7 @@ function WorkoutDetails(props: wdP) {
     );
     const json = await res.json();
     if (res.ok) {
-      setWorkouts((draft) => {
+      setContacts((draft) => {
         return draft?.filter((v) => v._id !== json._id);
       });
     }
@@ -103,12 +103,12 @@ function WorkoutDetails(props: wdP) {
 
   return (
     <div className="wd">
-      <h4> {workout.title}</h4>
+      <h4> {workout.name}</h4>
       <p>
-        <strong>Load(kg):</strong> {workout.load}
+        <strong>Second Name:</strong> {workout.second_name}
       </p>
       <p>
-        <strong>Reps:</strong> {workout.reps}
+        <strong>Email:</strong> {workout.email}
       </p>
       <p>
         {formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}

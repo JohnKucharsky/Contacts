@@ -50,7 +50,7 @@ function App() {
     }
   }, []);
 
-  console.log("AuthContext state: ", state);
+  console.log("Auth state: ", state);
   return (
     <div className="app">
       <Navbar user={state.user} dispatch={dispatch} />

@@ -9,10 +9,12 @@ interface ContactFormProps {
   contacts: contactProps[] | null;
   id: string;
   setEditMod: React.Dispatch<React.SetStateAction<boolean>>;
+  setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function ContactForm(props: ContactFormProps) {
-  const { setContacts, user, editMod, setEditMod, contacts, id } = props;
+  const { setContacts, user, editMod, setEditMod, contacts, id, setTrigger } =
+    props;
   const [form, setForm] = useImmer({
     name: "",
     second_name: "",
@@ -105,6 +107,13 @@ function ContactForm(props: ContactFormProps) {
     }
     if (response.ok) {
       setError(null);
+      console.log(json);
+      setContacts((draft) => {
+        const exist = draft?.filter((v) => v._id === json._id);
+        if (exist) {
+          draft = { ...json };
+        }
+      });
       setEmptyFields([]);
     }
 

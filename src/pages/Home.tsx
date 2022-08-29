@@ -31,6 +31,7 @@ function Home(props: HomeProps) {
   const [editMod, setEditMod] = useState(false);
   const [id, setId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [trigger, setTrigger] = useState(false);
 
   const navigate = useNavigate();
 
@@ -55,7 +56,7 @@ function Home(props: HomeProps) {
     if (user) {
       fetchContacts();
     }
-  }, [setContacts, user, editMod]);
+  }, [setContacts, user, trigger]);
 
   useEffect(() => {
     if (!user) {
@@ -96,6 +97,7 @@ function Home(props: HomeProps) {
         editMod={editMod}
         setEditMod={setEditMod}
         id={id}
+        setTrigger={setTrigger}
       />
     </div>
   );

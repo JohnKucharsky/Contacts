@@ -69,7 +69,7 @@ function Login(props: LoginProps) {
         onChange={(e) => setForm({ ...form, password: e.target.value })}
         value={form.password}
       />
-      <button disabled={!!isLoading}>Login</button>
+      {isLoading ? "Ждем..." : <button>Login</button>}
       {error && <div className="error">{error}</div>}
     </form>
   );

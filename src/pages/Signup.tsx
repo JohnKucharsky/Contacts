@@ -68,7 +68,7 @@ function Signup(props: SignupProps) {
         onChange={(e) => setForm({ ...form, password: e.target.value })}
         value={form.password}
       />
-      <button disabled={!!isLoading}>SignUp</button>
+      {isLoading ? "Ждем..." : <button>SignUp</button>}
       {error && <div className="error">{error}</div>}
     </form>
   );

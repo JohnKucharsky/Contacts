@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { useImmer, Updater } from "use-immer";
 import { userProps } from "../App";
 import { contactProps } from "../pages/Home";
 interface ContactFormProps {
   setContacts: Updater<contactProps[] | null>;
   user: userProps | null;
+  editMod: boolean;
+  contacts: contactProps[] | null;
+  id: string;
+  setEditMod: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function ContactForm(props: ContactFormProps) {
-  const { setContacts, user } = props;
+  const { setContacts, user, editMod, setEditMod, contacts, id } = props;
   const [form, setForm] = useImmer({
     name: "",
     second_name: "",
@@ -16,9 +20,11 @@ function ContactForm(props: ContactFormProps) {
   });
   const [error, setError] = useState<string | null>(null);
   const [emptyFields, setEmptyFields] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: { preventDefault: () => void }) {
+  async function handleSubmitCreate(e: SyntheticEvent) {
     e.preventDefault();
+    setLoading(true);
     if (!user) {
       setError("You must be logged in");
       return;
@@ -41,7 +47,6 @@ function ContactForm(props: ContactFormProps) {
     }
     if (response.ok) {
       setError(null);
-      console.log(json);
       setContacts((draft) => {
         draft?.unshift(json);
       });
@@ -52,11 +57,66 @@ function ContactForm(props: ContactFormProps) {
       second_name: "",
       email: "",
     });
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    const contact = contacts?.filter((v) => v._id === id)[0];
+    if (!contact) return;
+    if (editMod) {
+      setForm({
+        name: contact?.name,
+        second_name: contact.second_name,
+        email: contact.email,
+      });
+    } else {
+      setForm({
+        name: "",
+        second_name: "",
+        email: "",
+      });
+    }
+  }, [contacts, editMod, id, setForm]);
+
+  async function handleSubmitEdit(e: SyntheticEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const contact = contacts?.filter((v) => v._id === id)[0];
+    if (!contact) return;
+    if (!user) {
+      setError("You must be logged in");
+      return;
+    }
+    const response = await fetch(
+      `${process.env.REACT_APP_ADDRESS}api/contacts/${contact._id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      },
+    );
+    const json = await response.json();
+    if (!response.ok) {
+      setError(json.error);
+      setEmptyFields(json.emptyFields);
+    }
+    if (response.ok) {
+      setError(null);
+      setEmptyFields([]);
+    }
+
+    setEditMod(false);
+    setLoading(false);
   }
   return (
-    <form className="wf" onSubmit={handleSubmit}>
-      <h3>Add a New contact</h3>
-      <label>Name:</label>
+    <form
+      className="wf"
+      onSubmit={editMod ? handleSubmitEdit : handleSubmitCreate}>
+      <h3>{editMod ? "Изменить" : "Добавить"} Контакт</h3>
+      <label>Имя:</label>
       <input
         type="text"
         value={form.name}
@@ -67,9 +127,9 @@ function ContactForm(props: ContactFormProps) {
         }
         className={emptyFields?.includes("name") ? "error" : ""}
       />
-      <label>Second Name:</label>
+      <label>Фамилия:</label>
       <input
-        type="number"
+        type="text"
         value={form.second_name}
         onChange={(e) =>
           setForm((draft) => {
@@ -80,7 +140,7 @@ function ContactForm(props: ContactFormProps) {
       />
       <label>Email:</label>
       <input
-        type="number"
+        type="email"
         value={form.email}
         onChange={(e) =>
           setForm((draft) => {
@@ -89,7 +149,11 @@ function ContactForm(props: ContactFormProps) {
         }
         className={emptyFields?.includes("email") ? "error" : ""}
       />
-      <button type="submit">Add Contact</button>
+      {loading ? (
+        "Ждем..."
+      ) : (
+        <button type="submit">{editMod ? "Изменить" : "Добавить"}</button>
+      )}
       {error && <div className="wf__error">{error}</div>}
     </form>
   );

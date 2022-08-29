@@ -3,10 +3,11 @@ import { actionProps, userProps } from "../App";
 interface NavbarProps {
   user: userProps | null;
   dispatch: React.Dispatch<actionProps>;
+  setInputTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
 function Navbar(props: NavbarProps) {
-  const { user, dispatch } = props;
+  const { user, dispatch, setInputTerm } = props;
 
   function handleClick() {
     localStorage.removeItem("user");
@@ -16,18 +17,23 @@ function Navbar(props: NavbarProps) {
     <div className="header">
       <div className="header__container">
         <Link to="/">
-          <h1>Workout Body</h1>
+          <h1>Контакты</h1>
         </Link>
+        <input
+          style={{ width: 150 }}
+          type="text"
+          onChange={(e) => setInputTerm(e.target.value)}
+        />
         <nav>
           {user ? (
             <div>
               <span>{user?.email}</span>
-              <button onClick={handleClick}>Log out</button>
+              <button onClick={handleClick}>Выйти</button>
             </div>
           ) : (
             <div>
-              <Link to="/login">Login</Link>
-              <Link to="/signup">Signup</Link>
+              <Link to="/login">Войти</Link>
+              <Link to="/signup">Зарегистрироваться</Link>
             </div>
           )}
         </nav>

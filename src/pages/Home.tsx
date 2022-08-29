@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { AiOutlineDelete } from "react-icons/ai";
-import WorkoutForm from "../components/ContactForm";
+import ContactForm from "../components/ContactForm";
 import { userProps } from "../App";
 import { useImmer, Updater } from "use-immer";
 import { useNavigate } from "react-router-dom";
+import { RiPencilLine } from "react-icons/ri";
+import { ru } from "date-fns/esm/locale";
+import { ImSpinner } from "react-icons/im";
 
 interface HomeProps {
   user: userProps | null;
+  inputTerm: string;
 }
 
 export interface contactProps {
@@ -22,14 +26,17 @@ export interface contactProps {
 }
 
 function Home(props: HomeProps) {
-  const { user } = props;
+  const { user, inputTerm } = props;
   const [contacts, setContacts] = useImmer<contactProps[] | null>(null);
+  const [editMod, setEditMod] = useState(false);
+  const [id, setId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  console.log(contacts);
   useEffect(() => {
     async function fetchContacts() {
+      setIsLoading(true);
       const response = await fetch(
         `${process.env.REACT_APP_ADDRESS}api/contacts`,
         {
@@ -43,11 +50,12 @@ function Home(props: HomeProps) {
       if (response.ok) {
         setContacts(json);
       }
+      setIsLoading(false);
     }
     if (user) {
       fetchContacts();
     }
-  }, [setContacts, user]);
+  }, [setContacts, user, editMod]);
 
   useEffect(() => {
     if (!user) {
@@ -55,37 +63,62 @@ function Home(props: HomeProps) {
     }
   }, [navigate, user]);
 
+  const filteredContacts = contacts?.filter((v) => {
+    if (
+      v.email.includes(inputTerm) ||
+      v.name.includes(inputTerm) ||
+      v.second_name.includes(inputTerm)
+    ) {
+      return v;
+    }
+    return null;
+  });
+
+  if (isLoading) return <div>Ждем...</div>;
   return (
     <div className="home">
-      <div className="home__workouts">
-        {contacts?.map((v: contactProps) => (
-          <WorkoutDetails
+      <div className="home__contacts">
+        {filteredContacts?.map((v: contactProps) => (
+          <ContactDetails
             key={v._id}
-            workout={v}
+            contact={v}
             user={user}
             setContacts={setContacts}
+            setEditMod={setEditMod}
+            setId={setId}
           />
         ))}
       </div>
-      <WorkoutForm user={user} setContacts={setContacts} />
+      <ContactForm
+        user={user}
+        setContacts={setContacts}
+        contacts={contacts}
+        editMod={editMod}
+        setEditMod={setEditMod}
+        id={id}
+      />
     </div>
   );
 }
 
 export default Home;
 
-interface wdP {
-  workout: contactProps;
+interface ContactDetailsProps {
+  contact: contactProps;
   user: userProps | null;
   setContacts: Updater<contactProps[] | null>;
+  setEditMod: React.Dispatch<React.SetStateAction<boolean>>;
+  setId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function WorkoutDetails(props: wdP) {
-  const { workout, user, setContacts } = props;
+function ContactDetails(props: ContactDetailsProps) {
+  const { contact, user, setContacts, setEditMod, setId } = props;
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleClick() {
+    setIsLoading(true);
     const res = await fetch(
-      `${process.env.REACT_APP_ADDRESS}api/contacts/${workout._id}`,
+      `${process.env.REACT_APP_ADDRESS}api/contacts/${contact._id}`,
       {
         method: "DELETE",
         headers: {
@@ -99,22 +132,39 @@ function WorkoutDetails(props: wdP) {
         return draft?.filter((v) => v._id !== json._id);
       });
     }
+    setIsLoading(false);
   }
 
   return (
     <div className="wd">
-      <h4> {workout.name}</h4>
+      <div className="wd__item">
+        <h5 className="terms__strong">Имя:</h5>
+        {contact.name}
+      </div>
+      <div className="wd__item">
+        <h5 className="terms__strong">Фамилия:</h5>
+        {contact.second_name}
+      </div>
+      <div className="wd__item">
+        <h5 className="terms__strong">Email:</h5>
+        {contact.email}
+      </div>
       <p>
-        <strong>Second Name:</strong> {workout.second_name}
-      </p>
-      <p>
-        <strong>Email:</strong> {workout.email}
-      </p>
-      <p>
-        {formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}
+        Добавлен{" "}
+        {formatDistanceToNow(new Date(contact.createdAt), {
+          addSuffix: true,
+          locale: ru,
+        })}
       </p>
       <span onClick={() => handleClick()}>
-        <AiOutlineDelete color="#06815e" />
+        {isLoading ? <ImSpinner /> : <AiOutlineDelete color="#06815e" />}
+      </span>
+      <span
+        onClick={() => {
+          setId(contact._id);
+          setEditMod(true);
+        }}>
+        <RiPencilLine color="#06815e" />
       </span>
     </div>
   );

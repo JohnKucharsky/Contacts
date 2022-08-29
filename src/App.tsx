@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 interface initStateProps {
   user: userProps | null;
@@ -18,6 +18,7 @@ export interface userProps {
   token: string;
 }
 function App() {
+  const [inputTerm, setInputTerm] = useState("");
   const initialState = {
     user: null,
   };
@@ -50,13 +51,19 @@ function App() {
     }
   }, []);
 
-  console.log("Auth state: ", state);
   return (
     <div className="app">
-      <Navbar user={state.user} dispatch={dispatch} />
+      <Navbar
+        user={state.user}
+        setInputTerm={setInputTerm}
+        dispatch={dispatch}
+      />
       <div className="app__pages">
         <Routes>
-          <Route path="/" element={<Home user={state.user} />} />
+          <Route
+            path="/"
+            element={<Home user={state.user} inputTerm={inputTerm} />}
+          />
           <Route
             path="/login"
             element={<Login dispatch={dispatch} user={state.user} />}

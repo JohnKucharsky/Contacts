@@ -55,20 +55,20 @@ function Signup(props: SignupProps) {
 
   return (
     <form className="signup" onSubmit={handleSubmit}>
-      <h3>Sign Up</h3>
+      <h3>Регистрация</h3>
       <label>Email:</label>
       <input
         type="email"
         onChange={(e) => setForm({ ...form, email: e.target.value })}
         value={form.email}
       />
-      <label>Password:</label>
+      <label>Пароль:</label>
       <input
         type="password"
         onChange={(e) => setForm({ ...form, password: e.target.value })}
         value={form.password}
       />
-      {isLoading ? "Ждем..." : <button>SignUp</button>}
+      {isLoading ? "Ждем..." : <button>Зарегистрироваться</button>}
       {error && <div className="error">{error}</div>}
     </form>
   );

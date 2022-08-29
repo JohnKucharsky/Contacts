@@ -89,6 +89,10 @@ input {
   display: block;
 }
 
+label {
+  color: gray;
+}
+
 input {
   padding: 10px;
   margin-top: 10px;
@@ -143,6 +147,11 @@ form.login {
   background: #fff;
   border-radius: 4px;
 }
+
+.signup h3 {
+  margin-bottom: 1rem;
+}
+
 
 nav button {
   background: #fff;

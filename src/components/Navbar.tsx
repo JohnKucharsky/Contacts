@@ -22,6 +22,7 @@ function Navbar(props: NavbarProps) {
         <input
           style={{ width: 150 }}
           type="text"
+          placeholder="Поиск..."
           onChange={(e) => setInputTerm(e.target.value)}
         />
         <nav>

@@ -107,16 +107,9 @@ function ContactForm(props: ContactFormProps) {
     }
     if (response.ok) {
       setError(null);
-      console.log(json);
-      setContacts((draft) => {
-        const exist = draft?.filter((v) => v._id === json._id);
-        if (exist) {
-          draft = { ...json };
-        }
-      });
       setEmptyFields([]);
+      setTrigger((prev) => !prev);
     }
-
     setEditMod(false);
     setLoading(false);
   }
